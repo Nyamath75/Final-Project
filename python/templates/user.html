@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Web Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        nav {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            /* Ensure the navbar stays above other elements */
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #fff;
+            margin: 0 20px;
+            font-size: 18px;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            padding-top: 60px;
+            /* Ensure content starts below navbar */
+        }
+
+        .sidebar {
+            width: 30%;
+            background-color: #ddd;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .main-content {
+            width: 65%;
+            background-color: #fff;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .list,
+        .video-player {
+            max-height: 600px;
+            /* Maximum height for scroll bar */
+            overflow-y: auto;
+            /* Enable vertical scroll when content exceeds height */
+        }
+
+        .list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .list li {
+            margin-bottom: 20px;
+            cursor: pointer;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+        }
+
+        .item-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .item-title {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .item-description {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .item-date {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .video-player {
+            width: 100%;
+            height: 450px;
+            border: 1px solid #ccc;
+            margin-top: 20px;
+            background-color: #f9f9f9;
+        }
+
+        .chat-section {
+            width: 100%;
+            height: 450px;
+            border: 1px solid #ccc;
+            margin-top: 20px;
+            background-color: #f9f9f9;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .chat-section {
+            /* flex: 1; */
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .typing-area {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-top: 1px solid #ccc;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 8px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #sendButton {
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #sendButton:hover {
+            background-color: #0056b3;
+        }
+
+        .sent-message {
+            text-align: right;
+        }
+
+        .received-message {
+            text-align: left;
+        }
+
+        .chat-card {
+            background-color: #ffffff;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+            padding: 10px;
+            overflow: hidden;
+            /* Ensure card size adjusts to content */
+            word-wrap: break-word;
+            /* Wrap long words */
+        }
+
+        .sender {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .chat-message {
+            font-size: 14px;
+        }
+
+        /* Float sender's message to the right */
+        .sent-message .sender {
+            float: right;
+        }
+
+        /* Align sender's message to the right */
+        .sent-message .chat-message {
+            text-align: right;
+        }
+
+        /* Align received message to the left */
+        .received-message .chat-message {
+            text-align: left;
+        }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.3/socket.io.js"></script>
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        socket.on('connect', function () {
+            console.log('Connected to server');
+            addRoom();
+        });
+
+        function addRoom() {
+            var sessionValue = "{{ session['user_name'] }}";
+            socket.emit('join_room', { email: sessionValue })
+        }
+
+        socket.on('received_notification', function (data) {
+
+            const chatContainer = document.createElement('div');
+            chatContainer.classList.add('chat-card');
+
+            const senderElement = document.createElement('div');
+            const chatMessageElement = document.createElement('div');
+            chatMessageElement.textContent = data.message;
+            chatMessageElement.classList.add('chat-message');
+
+            // Check if the sender matches the current user's username
+            if (data.sender === "{{ session['username'] }}") {
+                chatContainer.classList.add('sent-message');
+                chatMessageElement.classList.add('sent-message');
+            } else {
+                senderElement.textContent = data.sender;
+                senderElement.classList.add('sender');
+                chatContainer.appendChild(senderElement);
+                chatMessageElement.classList.add('received-message');
+            }
+
+            chatContainer.appendChild(chatMessageElement);
+            // chatSection.appendChild(chatContainer);
+            document.getElementById('chatSection').appendChild(chatContainer);
+            chatSection.scrollTop = chatSection.scrollHeight;
+
+
+        });
+
+        function sendNotification() {
+
+            var message = document.getElementById('messageInput').value;
+            var sender = "{{ session['username'] }}";
+            //console.log(message);
+            socket.emit('push_notification', { sender: sender, message: message });
+        }       
+
+       
+function logout() {
+    fetch('/logout')
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else {
+                // Handle error if logout fails
+                console.error('Logout failed');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+    </script>
+</head>
+
+<body>
+    <nav>
+        <a href="#" id="videos">Videos</a>
+        <a href="#" id="pdfs">PDFs</a>
+        <a href="#" id="chat">Chat Section</a>
+        <a href="#" id="logout" onclick="logout()">Logout</a>
+    </nav>
+
+    <div class="container">
+        <div class="sidebar" id="videoSidebar">
+            <h2>Video List</h2>
+            <ul class="list" id="videoList">
+                <!-- Video list will be populated dynamically -->
+            </ul>
+        </div>
+        <div class="sidebar" id="pdfSidebar" style="display: none;">
+            <h2>PDF List</h2>
+            <ul class="list" id="pdfList">
+                <!-- PDF list will be populated dynamically -->
+            </ul>
+        </div>
+        <div class="main-content">
+            <div class="video-player" id="videoPlayer">
+                Video Player
+            </div>
+            <div class="pdf-viewer" id="pdfViewer">
+                PDF Viewer
+            </div>
+            <div id="chat-container" class="chat-container" style="display:none;">
+                <div class="chat-section" id="chatSection">
+
+                </div>
+                <div class="typing-area">
+                    <textarea id="messageInput" placeholder="Type your message here..."></textarea>
+                    <button id="sendButton" onclick="sendNotification()">Send</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <script>
+        const videosTab = document.getElementById('videos');
+        const pdfsTab = document.getElementById('pdfs');
+        const chatTab = document.getElementById('chat');
+        const logoutTab = document.getElementById('logout');
+        const videoSidebar = document.getElementById('videoSidebar');
+        const pdfSidebar = document.getElementById('pdfSidebar');
+        const videoList = document.getElementById('videoList');
+        const pdfList = document.getElementById('pdfList');
+        const videoPlayer = document.getElementById('videoPlayer');
+        const pdfViewer = document.getElementById('pdfViewer');
+        const chatSection = document.getElementById('chatSection');
+        videoPlayer.style.display = 'none';
+            pdfViewer.style.display = 'none';
+            videoSidebar.style.display = 'none';
+
+
+        videosTab.addEventListener('click', function (e) {
+            e.preventDefault();
+            videoSidebar.style.display = 'block';
+            pdfSidebar.style.display = 'none';
+            videoPlayer.style.display = 'block';
+            pdfViewer.style.display = 'none';
+            chatSection.style.display = 'none';
+            document.getElementById('chat-container').style.display="none";
+        });
+
+        pdfsTab.addEventListener('click', function (e) {
+            e.preventDefault();
+            pdfSidebar.style.display = 'block';
+            videoSidebar.style.display = 'none';
+            pdfViewer.style.display = 'block';
+            videoPlayer.style.display = 'none';
+            chatSection.style.display = 'none';
+            document.getElementById('chat-container').style.display="none";
+        });
+
+        chatTab.addEventListener('click', function (e) {
+            document.getElementById('chat-container').style.display="block";
+            e.preventDefault();
+            chatSection.style.display = 'block';
+            pdfViewer.style.display = 'none';
+            videoPlayer.style.display = 'none';
+            videoSidebar.style.display = 'none';
+            pdfSidebar.style.display = 'none';
+
+            fetchChatHistory();
+        });
+
+        function fetchChatHistory() {
+            fetch('/getChatHistory')
+                .then(response => response.json())
+                .then(data => {
+                    if (data) {
+                        console.log(data);
+                        // Clear existing chat messages
+                        chatSection.innerHTML = '';
+                        // Populate chat messages
+                        data.forEach(chat => {
+                            const chatContainer = document.createElement('div');
+                            chatContainer.classList.add('chat-card');
+
+                            const senderElement = document.createElement('div');
+                            const chatMessageElement = document.createElement('div');
+                            chatMessageElement.textContent = chat.chat;
+                            chatMessageElement.classList.add('chat-message');
+
+                            // Check if the sender matches the current user's username
+                            if (chat.sender === "{{ session['username'] }}") {
+                                chatContainer.classList.add('sent-message');
+                                chatMessageElement.classList.add('sent-message');
+                            } else {
+                                senderElement.textContent = chat.sender;
+                                senderElement.classList.add('sender');
+                                chatContainer.appendChild(senderElement);
+                                chatMessageElement.classList.add('received-message');
+                            }
+
+                            chatContainer.appendChild(chatMessageElement);
+                            chatSection.appendChild(chatContainer);
+                        });
+                        chatSection.scrollTop = chatSection.scrollHeight;
+                    } else {
+                        console.log('Failed to fetch chat history');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function loadVideoDetails(video) {
+            videoPlayer.innerHTML = `
+        <div style="max-width: 100%; overflow: hidden;">
+            <video controls style="width: 100%;">
+                <source src="${video.file_path}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        <div>
+            <h3>Add Comment</h3>
+            <textarea id="commentInput" rows="4" cols="50"></textarea>
+            <button onclick="sendComment('${video.video_id}')">Send Comment</button>
+        </div>
+    `;
+        }
+
+        function sendComment(videoId) {
+            var comment = document.getElementById('commentInput').value;
+
+            var formData = new FormData();
+            formData.append('videoId', videoId);
+            formData.append('commentDescription', comment);
+
+
+            fetch('/add_comment', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to add comment');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert(data.message);
+
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+
+                });
+        }
+
+        function loadPdfDetails(pdf) {
+            pdfViewer.innerHTML = `
+                <iframe src="${pdf.file_path}" style="width: 100%; height: 500px;"></iframe>
+                <div>
+            <h3>Add Comment</h3>
+            <textarea id="commentInput" rows="4" cols="50"></textarea>
+            <button onclick="sendComment('${pdf.pdf_id}')">Send Comment</button>
+        </div>
+            `;
+        }
+
+        videoList.addEventListener('click', function (e) {
+            const clickedElement = e.target.closest('li');
+            if (clickedElement) {
+                const video = {
+                    title: clickedElement.querySelector('.item-title').textContent,
+                    description: clickedElement.querySelector('.item-description').textContent,
+                    file_path: clickedElement.querySelector('.file_path').textContent,
+                    video_id: clickedElement.querySelector('.video_id').textContent,
+                    date: clickedElement.querySelector('.item-date').textContent.replace('Uploaded: ', '')
+                };
+                loadVideoDetails(video);
+            }
+        });
+
+        pdfList.addEventListener('click', function (e) {
+            const clickedElement = e.target.closest('li');
+            if (clickedElement) {
+                const pdf = {
+                    title: clickedElement.querySelector('.item-title').textContent,
+                    description: clickedElement.querySelector('.item-description').textContent,
+                    file_path: clickedElement.querySelector('.file_path').textContent,
+                    pdf_id: clickedElement.querySelector('.pdf_id').textContent,
+                    date: clickedElement.querySelector('.item-date').textContent.replace('Uploaded: ', '')
+                };
+                loadPdfDetails(pdf);
+            }
+        });
+
+     
+        function generateVideoList() {
+            var videos;
+            fetch('/get_video_url')
+                .then(response => response.json())
+                .then(data => {
+                    if (data) {
+                        console.log(data);
+                        videos = data;
+                        videoList.innerHTML = ''; // Clear existing list
+
+                        videos.forEach(video => {
+                            const li = document.createElement('li');
+                            li.innerHTML = `
+                    <div class="item-info">
+                        <div>
+                            <div class="item-title">${video.content_name}</div>
+                            <div class="item-description">${video.comment}</div>
+                            <div class="file_path" style="display: none;">${video.file_path}</div>
+                            <div class="video_id" style="display: none;">${video.id}</div>
+                        </div>
+                        <div class="item-date">Uploaded: ${video.content_type}</div>
+                    </div>
+                `;
+                            videoList.appendChild(li);
+                        });
+                    } else {
+                        alert('Failed to fetch video.');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+
+           
+        }
+
+      
+        function generatePDFList() {
+            var pdfs;
+          
+
+            fetch('/get_document_url')
+                .then(response => response.json())
+                .then(data => {
+                    if (data) {
+                        console.log(data);
+                        pdfs = data;
+                        pdfList.innerHTML = ''; 
+
+                        pdfs.forEach(pdf => {
+                            const li = document.createElement('li');
+                            li.innerHTML = `
+                    <div class="item-info">
+                        <div>
+                            <div class="item-title">${pdf.content_name}</div>
+                            <div class="item-description">${pdf.comment}</div>
+                            <div class="file_path" style="display: none;">${pdf.file_path}</div>
+                            <div class="pdf_id" style="display: none;">${pdf.id}</div>
+                        </div>
+                        <div class="item-date">Uploaded: ${pdf.content_type}</div>
+                    </div>
+                `;
+                            pdfList.appendChild(li);
+                        });
+                    } else {
+                        alert('Failed to fetch video.');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+
+        }
+
+       
+        generateVideoList();
+        generatePDFList();
+    </script>
+</body>
+
+</html>

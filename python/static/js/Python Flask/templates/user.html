@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Web Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        nav {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #fff;
+            margin: 0 20px;
+            font-size: 18px;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+        }
+
+        .sidebar {
+            width: 30%;
+            background-color: #ddd;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .main-content {
+            width: 65%;
+            background-color: #fff;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .list li {
+            margin-bottom: 20px;
+            cursor: pointer;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+        }
+
+        .item-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .item-title {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .item-description {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .item-date {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .video-player, .pdf-viewer, .chat-section {
+            width: 100%;
+            height: 400px;
+            border: 1px solid #ccc;
+            margin-top: 20px;
+            background-color: #f9f9f9;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome, {{ username }}</h1>
+    <nav>
+        <a href="#" id="videos">Videos</a>
+        <a href="#" id="pdfs">PDFs</a>
+        <a href="#" id="chat">Chat Section</a>
+        <a href="#" id="logout">Logout</a>
+    </nav>
+
+    <div class="container">
+        <div class="sidebar" id="videoSidebar">
+            <h2>Video List</h2>
+            <ul class="list" id="videoList">
+                <!-- Video list will be populated dynamically -->
+            </ul>
+        </div>
+        <div class="sidebar" id="pdfSidebar" style="display: none;">
+            <h2>PDF List</h2>
+            <ul class="list" id="pdfList">
+                <!-- PDF list will be populated dynamically -->
+            </ul>
+        </div>
+        <div class="main-content">
+            <div class="video-player" id="videoPlayer">
+                Video Player
+            </div>
+            <div class="pdf-viewer" id="pdfViewer">
+                PDF Viewer
+            </div>
+            <div class="chat-section" id="chatSection">
+                Chat Section
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const videosTab = document.getElementById('videos');
+        const pdfsTab = document.getElementById('pdfs');
+        const chatTab = document.getElementById('chat');
+        const logoutTab = document.getElementById('logout');
+        const videoSidebar = document.getElementById('videoSidebar');
+        const pdfSidebar = document.getElementById('pdfSidebar');
+        const videoList = document.getElementById('videoList');
+        const pdfList = document.getElementById('pdfList');
+        const videoPlayer = document.getElementById('videoPlayer');
+        const pdfViewer = document.getElementById('pdfViewer');
+        const chatSection = document.getElementById('chatSection');
+
+        videosTab.addEventListener('click', function(e) {
+            e.preventDefault();
+            videoSidebar.style.display = 'block';
+            pdfSidebar.style.display = 'none';
+            videoPlayer.style.display = 'block';
+            pdfViewer.style.display = 'none';
+            chatSection.style.display = 'none';
+        });
+
+        pdfsTab.addEventListener('click', function(e) {
+            e.preventDefault();
+            pdfSidebar.style.display = 'block';
+            videoSidebar.style.display = 'none';
+            pdfViewer.style.display = 'block';
+            videoPlayer.style.display = 'none';
+            chatSection.style.display = 'none';
+        });
+
+        chatTab.addEventListener('click', function(e) {
+            e.preventDefault();
+            chatSection.style.display = 'block';
+            pdfViewer.style.display = 'none';
+            videoPlayer.style.display = 'none';
+            videoSidebar.style.display = 'none';
+            pdfSidebar.style.display = 'none';
+        });
+
+        function loadVideoDetails(video) {
+            videoPlayer.innerHTML = `
+                <h2>${video.title}</h2>
+                <p>${video.description}</p>
+                <p>Date: ${video.date}</p>
+                <!-- Add video player here if needed -->
+            `;
+        }
+
+        function loadPdfDetails(pdf) {
+            pdfViewer.innerHTML = `
+                <h2>${pdf.title}</h2>
+                <p>${pdf.description}</p>
+                <p>Date: ${pdf.date}</p>
+                <!-- Add PDF viewer here if needed -->
+            `;
+        }
+
+        videoList.addEventListener('click', function(e) {
+            const clickedElement = e.target.closest('li');
+            if (clickedElement) {
+                const video = {
+                    title: clickedElement.querySelector('.item-title').textContent,
+                    description: clickedElement.querySelector('.item-description').textContent,
+                    date: clickedElement.querySelector('.item-date').textContent.replace('Uploaded: ', '')
+                };
+                loadVideoDetails(video);
+            }
+        });
+
+        pdfList.addEventListener('click', function(e) {
+            const clickedElement = e.target.closest('li');
+            if (clickedElement) {
+                const pdf = {
+                    title: clickedElement.querySelector('.item-title').textContent,
+                    description: clickedElement.querySelector('.item-description').textContent,
+                    date: clickedElement.querySelector('.item-date').textContent.replace('Uploaded: ', '')
+                };
+                loadPdfDetails(pdf);
+            }
+        });
+
+        // Function to dynamically generate video list
+                function generateVideoList() {
+                    fetch('/get_video_url')
+    .then(response => response.json())
+    .then(data => {
+        if (data) {
+          console.log(data);
+        } else {
+            alert('Failed to fetch video.');
+        }
+    })
+    .catch(error => console.error('Error:', error));
+
+            const videos = [
+                { title: 'Video 1', description: 'This is a comment about video 1', date: 'April 20, 2024' },
+                { title: 'Video 2', description: 'This is a comment about video 2', date: 'April 19, 2024' },
+                { title: 'Video 3', description: 'This is a comment about video 3', date: 'April 18, 2024' }
+            ];
+
+            videoList.innerHTML = ''; // Clear existing list
+
+            videos.forEach(video => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div class="item-info">
+                        <div>
+                            <div class="item-title">${video.title}</div>
+                            <div class="item-description">${video.description}</div>
+                        </div>
+                        <div class="item-date">Uploaded: ${video.date}</div>
+                    </div>
+                `;
+                videoList.appendChild(li);
+            });
+        }
+
+        // Function to dynamically generate PDF list
+        function generatePDFList() {
+            const pdfs = [
+                { title: 'PDF 1', description: 'This is a comment about PDF 1', date: 'April 20, 2024' },
+                { title: 'PDF 2', description: 'This is a comment about PDF 2', date: 'April 19, 2024' },
+                { title: 'PDF 3', description: 'This is a comment about PDF 3', date: 'April 18, 2024' }
+            ];
+
+            pdfList.innerHTML = ''; // Clear existing list
+
+            pdfs.forEach(pdf => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div class="item-info">
+                        <div>
+                            <div class="item-title">${pdf.title}</div>
+                            <div class="item-description">${pdf.description}</div>
+                        </div>
+                        <div class="item-date">Uploaded: ${pdf.date}</div>
+                    </div>
+                `;
+                pdfList.appendChild(li);
+            });
+        }
+
+        // Call the functions to generate lists
+        generateVideoList();
+        generatePDFList();
+    </script>
+</body>
+</html>

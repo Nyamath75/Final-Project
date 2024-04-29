@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="#" onclick="showSection('upload')">Upload</a></li>
+                <li><a href="#" onclick="showSection('view-videos')">Videos</a></li>
+                <li><a href="#" onclick="showSection('read-comments')">Comments</a></li>
+                <li><a href="#" onclick="showSection('view-documents')">Documents</a></li>
+                <li><a href="#" onclick="showSection('edit-videos')">Edit</a></li>
+                <li><a href="#" onclick="showSection('logout')">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="upload" class="hidden">
+         <div class="container">
+        <h1>Upload Form</h1>
+        <form id="uploadForm" onsubmit="return false;">
+            <div class="form-group">
+                <label for="contentName">Content Name:</label>
+                <input type="text" id="contentName" name="contentName" required>
+            </div>
+            <div class="form-group">
+                <label for="contentType">Content Type:</label>
+                <select id="contentType" name="contentType" required>
+                    <option value="">Select Content Type</option>
+                    <option value="Video">Video</option>
+                    <option value="Document">Document</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="comment">Comment:</label>
+                <textarea id="comment" name="comment"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="file">Upload File:</label>
+                <input type="file" id="file" name="file" required>
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    </section>
+
+    <section id="view-videos" class="hidden">
+        <h2>View Videos Section</h2>
+        <div id="video-container" class="video-container"></div>
+    </section>
+
+    <section id="read-comments" class="hidden">
+        <h2>Read Comments Section</h2>
+        <!-- Content for read comments section -->
+    </section>
+
+    <section id="view-documents" class="hidden">
+        <h2>View Documents Section</h2>
+         <div id="document-container" class="document-container"></div>
+       <!-- <iframe src="static/uploads/5C27HQX_Angular_Level_2.pdf" width="100%" height="500px"></iframe>  -->
+    </section>
+
+    <section id="edit-videos" class="hidden">
+        <h2>Edit Videos Section</h2>
+        <!-- Content for edit videos section -->
+    </section>
+
+    <section id="edit-documents" class="hidden">
+        <h2>Edit Documents Section</h2>
+        <!-- Content for edit documents section -->
+    </section>
+
+    <footer>
+        <!-- Footer content -->
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+</body>
+</html>

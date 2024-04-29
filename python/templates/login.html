@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrator Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="login-container">
+        <h2>Administrator Login</h2>
+        <form id="login-form" method="POST">
+            <input type="text" id="username" placeholder="Username">
+            <input type="password" id="password" placeholder="Password">
+            <div class="radio-container">
+                <input type="radio" id="admin" name="user_type" value="admin">
+                <label for="admin">Admin</label>
+            </div>
+            <div class="radio-container">
+                <input type="radio" id="user" name="user_type" value="user">
+                <label for="user">User</label>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+    <script src="{{ url_for('static', filename='js/loginScript.js') }}"></script>
+</body>
+</html>
